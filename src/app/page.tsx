@@ -86,8 +86,8 @@ export default function Home() {
               診断をはじめる
               <span className="ml-2 opacity-70">（約3〜4分）</span>
             </Link>
-            <Link href="/result/sample" className="btn-secondary">
-              サンプル結果を見る
+            <Link href="/types" className="btn-secondary">
+              全16タイプを見る
             </Link>
           </motion.div>
         </div>

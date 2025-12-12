@@ -164,97 +164,80 @@ export default function ResultPage() {
               4軸の割合
             </h2>
 
-            <div className="space-y-8">
-              {axisData.map((axis, i) => {
+            <div className="space-y-6">
+              {axisData.map((axis) => {
                 const isLeftDominant = axis.leftValue >= axis.rightValue;
                 const dominantColor = isLeftDominant ? axis.leftColor : axis.rightColor;
                 const dominantLabel = isLeftDominant ? axis.leftShort : axis.rightShort;
-                const dominantValue = isLeftDominant ? axis.leftValue : axis.rightValue;
 
                 return (
-                  <motion.div
-                    key={axis.key}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 + i * 0.1 }}
-                    className="relative"
-                  >
-                    {/* 軸ラベル */}
-                    <div className="flex items-center justify-between mb-3">
+                  <div key={axis.key} className="relative">
+                    {/* 軸ラベル（上部） */}
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <span
-                          className="w-3 h-3 rounded-full"
+                          className="w-2.5 h-2.5 rounded-full"
                           style={{ background: axis.leftColor }}
                         />
-                        <span className="text-sm font-medium" style={{ color: axis.leftColor }}>
+                        <span className="text-sm font-bold" style={{ color: axis.leftColor }}>
                           {axis.leftShort}
                         </span>
+                        <span className="text-xs" style={{ color: 'var(--color-text-subtle)' }}>
+                          {axis.left}
+                        </span>
                       </div>
-                      <span className="text-xs" style={{ color: 'var(--color-text-subtle)' }}>
-                        {axis.left} ↔ {axis.right}
-                      </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium" style={{ color: axis.rightColor }}>
+                        <span className="text-xs" style={{ color: 'var(--color-text-subtle)' }}>
+                          {axis.right}
+                        </span>
+                        <span className="text-sm font-bold" style={{ color: axis.rightColor }}>
                           {axis.rightShort}
                         </span>
                         <span
-                          className="w-3 h-3 rounded-full"
+                          className="w-2.5 h-2.5 rounded-full"
                           style={{ background: axis.rightColor }}
                         />
                       </div>
                     </div>
 
-                    {/* バーグラフ */}
-                    <div className="relative h-10 rounded-xl overflow-hidden" style={{ background: 'var(--color-bg-subtle)' }}>
+                    {/* バーグラフ（シンプル版） */}
+                    <div className="flex h-8 rounded-lg overflow-hidden" style={{ background: 'var(--color-bg-subtle)' }}>
                       {/* 左側のバー */}
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${axis.leftValue}%` }}
-                        transition={{ delay: 0.6 + i * 0.1, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                        className="absolute left-0 top-0 h-full flex items-center justify-end pr-2"
+                      <div
+                        className="h-full flex items-center justify-center transition-all"
                         style={{
-                          background: `linear-gradient(90deg, ${axis.leftColor}dd, ${axis.leftColor})`,
-                          minWidth: axis.leftValue > 0 ? '40px' : '0'
+                          width: `${axis.leftValue}%`,
+                          background: axis.leftColor,
                         }}
                       >
-                        <span className="text-white text-sm font-bold drop-shadow-sm">
+                        <span className="text-white text-xs font-bold">
                           {axis.leftValue}%
                         </span>
-                      </motion.div>
-
+                      </div>
                       {/* 右側のバー */}
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${axis.rightValue}%` }}
-                        transition={{ delay: 0.6 + i * 0.1, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                        className="absolute right-0 top-0 h-full flex items-center justify-start pl-2"
+                      <div
+                        className="h-full flex items-center justify-center transition-all"
                         style={{
-                          background: `linear-gradient(270deg, ${axis.rightColor}dd, ${axis.rightColor})`,
-                          minWidth: axis.rightValue > 0 ? '40px' : '0'
+                          width: `${axis.rightValue}%`,
+                          background: axis.rightColor,
                         }}
                       >
-                        <span className="text-white text-sm font-bold drop-shadow-sm">
+                        <span className="text-white text-xs font-bold">
                           {axis.rightValue}%
                         </span>
-                      </motion.div>
+                      </div>
                     </div>
 
-                    {/* 優勢タイプ表示 */}
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 1.2 + i * 0.1 }}
-                      className="mt-2 text-center"
-                    >
+                    {/* 優勢タイプバッジ */}
+                    <div className="mt-1.5 text-center">
                       <span
-                        className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full"
+                        className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium"
                         style={{ background: `${dominantColor}15`, color: dominantColor }}
                       >
-                        <span className="font-bold">{dominantLabel}</span>
-                        <span>優勢 ({dominantValue}%)</span>
+                        {dominantLabel}寄り
                       </span>
-                    </motion.div>
-                  </motion.div>
+                    </div>
+                  </div>
                 );
               })}
             </div>

@@ -86,14 +86,14 @@ export default function TypesPage() {
                   if (!typeData) return null;
 
                   return (
-                    <motion.div
-                      key={typeKey}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: groupIndex * 0.1 + i * 0.05 }}
-                      whileHover={{ scale: 1.02 }}
-                      className="card p-5 cursor-pointer"
-                    >
+                    <Link key={typeKey} href={`/types/${typeKey}`}>
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: groupIndex * 0.1 + i * 0.05 }}
+                        whileHover={{ scale: 1.02 }}
+                        className="card p-5 cursor-pointer h-full"
+                      >
                       <div className="flex items-start gap-4">
                         <div className="flex-shrink-0">
                           <TypeIllustration typeCode={typeKey} size="sm" animate={false} />
@@ -126,7 +126,8 @@ export default function TypesPage() {
                           </div>
                         </div>
                       </div>
-                    </motion.div>
+                      </motion.div>
+                    </Link>
                   );
                 })}
               </div>
