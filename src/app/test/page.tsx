@@ -7,8 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { questions, pageHeadings } from '@/data/questions';
 import { calculateScore, encodeAnswers, Answers } from '@/lib/scoring';
 
-const QUESTIONS_PER_PAGE = 10;
-const TOTAL_PAGES = Math.ceil(questions.length / QUESTIONS_PER_PAGE);
+const QUESTIONS_PER_PAGE = 8;
+const TOTAL_PAGES = Math.ceil(questions.length / QUESTIONS_PER_PAGE); // 32問 ÷ 8 = 4ページ
 const STORAGE_KEY = 'housing_mbti_answers_v1';
 
 export default function TestPage() {

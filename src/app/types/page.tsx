@@ -142,7 +142,7 @@ export default function TypesPage() {
               あなたはどのタイプ？
             </h3>
             <p className="mb-6" style={{ color: 'var(--color-text-muted)' }}>
-              72問の診断であなたの住まいMBTIを発見しよう
+              32問の診断であなたの住まいMBTIを発見しよう
             </p>
             <Link href="/test" className="btn-primary">
               診断をはじめる

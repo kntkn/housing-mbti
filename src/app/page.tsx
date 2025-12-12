@@ -51,7 +51,7 @@ export default function Home() {
                 border: '1px solid var(--color-border)'
               }}
             >
-              72問の心理診断
+              32問の心理診断
             </span>
           </motion.div>
 
@@ -72,7 +72,7 @@ export default function Home() {
             className="text-lg md:text-xl mb-10 max-w-2xl mx-auto"
             style={{ color: 'var(--color-text-muted)' }}
           >
-            72問で&quot;住まいの本性&quot;を可視化。
+            32問で&quot;住まいの本性&quot;を可視化。
             <br className="hidden md:block" />
             拠点派？身軽派？街派？巣派？
           </motion.p>
@@ -84,7 +84,7 @@ export default function Home() {
           >
             <Link href="/test" className="btn-primary text-lg px-10 py-4">
               診断をはじめる
-              <span className="ml-2 opacity-70">（約6〜8分）</span>
+              <span className="ml-2 opacity-70">（約3〜4分）</span>
             </Link>
             <Link href="/result/sample" className="btn-secondary">
               サンプル結果を見る
@@ -241,7 +241,7 @@ export default function Home() {
                 { icon: '🎯', text: 'A/Bで直感で選ぶ（悩みすぎない）' },
                 { icon: '🏠', text: '住む家の話だけ（投資・利回りは除外）' },
                 { icon: '💾', text: '結果は保存・共有できる' },
-                { icon: '⏱️', text: '10問ごとにページ切替（72問）' },
+                { icon: '⏱️', text: '8問ごとにページ切替（全32問）' },
               ].map((rule, i) => (
                 <li key={i} className="flex items-start gap-4">
                   <span className="text-2xl">{rule.icon}</span>
