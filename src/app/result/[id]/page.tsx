@@ -200,32 +200,37 @@ export default function ResultPage() {
                       </div>
                     </div>
 
-                    {/* バーグラフ（シンプル版） */}
-                    <div className="flex h-8 rounded-lg overflow-hidden" style={{ background: 'var(--color-bg-subtle)' }}>
-                      {/* 左側のバー */}
+                    {/* バーグラフ（両端から伸びて中央でぶつかる） */}
+                    <div className="relative h-10 rounded-lg overflow-hidden" style={{ background: 'var(--color-bg-subtle)' }}>
+                      {/* 左側のバー（左端から伸びる） */}
                       <div
-                        className="h-full flex items-center justify-center transition-all"
+                        className="absolute left-0 top-0 h-full flex items-center justify-start pl-2"
                         style={{
                           width: `${axis.leftValue}%`,
-                          background: axis.leftColor,
+                          background: `linear-gradient(90deg, ${axis.leftColor} 0%, ${axis.leftColor}dd 100%)`,
                         }}
                       >
-                        <span className="text-white text-xs font-bold">
+                        <span className="text-white text-xs font-bold drop-shadow-sm">
                           {axis.leftValue}%
                         </span>
                       </div>
-                      {/* 右側のバー */}
+                      {/* 右側のバー（右端から伸びる） */}
                       <div
-                        className="h-full flex items-center justify-center transition-all"
+                        className="absolute right-0 top-0 h-full flex items-center justify-end pr-2"
                         style={{
                           width: `${axis.rightValue}%`,
-                          background: axis.rightColor,
+                          background: `linear-gradient(270deg, ${axis.rightColor} 0%, ${axis.rightColor}dd 100%)`,
                         }}
                       >
-                        <span className="text-white text-xs font-bold">
+                        <span className="text-white text-xs font-bold drop-shadow-sm">
                           {axis.rightValue}%
                         </span>
                       </div>
+                      {/* 境界線（ぶつかるポイント） */}
+                      <div
+                        className="absolute top-0 h-full w-0.5 bg-white/80 shadow-lg"
+                        style={{ left: `${axis.leftValue}%`, transform: 'translateX(-50%)' }}
+                      />
                     </div>
 
                     {/* 優勢タイプバッジ */}
