@@ -92,19 +92,19 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* デコレーション */}
+        {/* デコレーション - スマホでは非表示 */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="absolute top-20 right-10 w-64 h-64 rounded-full opacity-20 blur-3xl pointer-events-none"
+          className="hidden md:block absolute top-20 right-10 w-64 h-64 rounded-full opacity-10 blur-3xl pointer-events-none"
           style={{ background: 'var(--color-accent)' }}
         />
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 0.7 }}
-          className="absolute top-40 left-10 w-48 h-48 rounded-full opacity-20 blur-3xl pointer-events-none"
+          className="hidden md:block absolute top-40 left-10 w-48 h-48 rounded-full opacity-10 blur-3xl pointer-events-none"
           style={{ background: 'var(--color-secondary)' }}
         />
       </motion.section>

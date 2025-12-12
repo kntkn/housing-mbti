@@ -6,10 +6,11 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { housingTypes, axisLabels } from '@/data/types';
 import { decodeAnswers, calculateScore, ScoreResult, Answers } from '@/lib/scoring';
+import TypeIllustration from '@/components/TypeIllustration';
 
-// サンプル結果用のダミーデータ
+// サンプル結果用のダミーデータ（32問）
 const sampleAnswers: Answers = Object.fromEntries(
-  Array.from({ length: 72 }, (_, i) => [i + 1, Math.random() > 0.5 ? 'A' : 'B'] as [number, 'A' | 'B'])
+  Array.from({ length: 32 }, (_, i) => [i + 1, Math.random() > 0.5 ? 'A' : 'B'] as [number, 'A' | 'B'])
 );
 
 export default function ResultPage() {
@@ -138,8 +139,12 @@ export default function ResultPage() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
+                {/* タイプイラスト */}
+                <div className="flex justify-center my-6">
+                  <TypeIllustration typeCode={result.typeCode} size="lg" />
+                </div>
                 <h1 className="text-2xl md:text-3xl font-bold mt-4 mb-2" style={{ color: 'var(--color-text)' }}>
-                  {typeData.emoji} {typeData.name}
+                  {typeData.name}
                 </h1>
                 <p className="text-lg" style={{ color: 'var(--color-text-muted)' }}>
                   {typeData.oneLiner}
@@ -159,43 +164,99 @@ export default function ResultPage() {
               4軸の割合
             </h2>
 
-            <div className="space-y-6">
-              {axisData.map((axis, i) => (
-                <motion.div
-                  key={axis.key}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + i * 0.1 }}
-                >
-                  <div className="flex items-center justify-between mb-2 text-sm">
-                    <span className="font-medium" style={{ color: axis.leftColor }}>
-                      {axis.leftShort} {axis.leftValue}%
-                    </span>
-                    <span className="font-medium" style={{ color: axis.rightColor }}>
-                      {axis.rightValue}% {axis.rightShort}
-                    </span>
-                  </div>
-                  <div className="relative h-4 rounded-full overflow-hidden" style={{ background: 'var(--color-border)' }}>
+            <div className="space-y-8">
+              {axisData.map((axis, i) => {
+                const isLeftDominant = axis.leftValue >= axis.rightValue;
+                const dominantColor = isLeftDominant ? axis.leftColor : axis.rightColor;
+                const dominantLabel = isLeftDominant ? axis.leftShort : axis.rightShort;
+                const dominantValue = isLeftDominant ? axis.leftValue : axis.rightValue;
+
+                return (
+                  <motion.div
+                    key={axis.key}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 + i * 0.1 }}
+                    className="relative"
+                  >
+                    {/* 軸ラベル */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="w-3 h-3 rounded-full"
+                          style={{ background: axis.leftColor }}
+                        />
+                        <span className="text-sm font-medium" style={{ color: axis.leftColor }}>
+                          {axis.leftShort}
+                        </span>
+                      </div>
+                      <span className="text-xs" style={{ color: 'var(--color-text-subtle)' }}>
+                        {axis.left} ↔ {axis.right}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium" style={{ color: axis.rightColor }}>
+                          {axis.rightShort}
+                        </span>
+                        <span
+                          className="w-3 h-3 rounded-full"
+                          style={{ background: axis.rightColor }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* バーグラフ */}
+                    <div className="relative h-10 rounded-xl overflow-hidden" style={{ background: 'var(--color-bg-subtle)' }}>
+                      {/* 左側のバー */}
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${axis.leftValue}%` }}
+                        transition={{ delay: 0.6 + i * 0.1, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                        className="absolute left-0 top-0 h-full flex items-center justify-end pr-2"
+                        style={{
+                          background: `linear-gradient(90deg, ${axis.leftColor}dd, ${axis.leftColor})`,
+                          minWidth: axis.leftValue > 0 ? '40px' : '0'
+                        }}
+                      >
+                        <span className="text-white text-sm font-bold drop-shadow-sm">
+                          {axis.leftValue}%
+                        </span>
+                      </motion.div>
+
+                      {/* 右側のバー */}
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${axis.rightValue}%` }}
+                        transition={{ delay: 0.6 + i * 0.1, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                        className="absolute right-0 top-0 h-full flex items-center justify-start pl-2"
+                        style={{
+                          background: `linear-gradient(270deg, ${axis.rightColor}dd, ${axis.rightColor})`,
+                          minWidth: axis.rightValue > 0 ? '40px' : '0'
+                        }}
+                      >
+                        <span className="text-white text-sm font-bold drop-shadow-sm">
+                          {axis.rightValue}%
+                        </span>
+                      </motion.div>
+                    </div>
+
+                    {/* 優勢タイプ表示 */}
                     <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${axis.leftValue}%` }}
-                      transition={{ delay: 0.6 + i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                      className="absolute left-0 top-0 h-full rounded-l-full"
-                      style={{ background: `linear-gradient(90deg, ${axis.leftColor}, ${axis.leftColor}88)` }}
-                    />
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${axis.rightValue}%` }}
-                      transition={{ delay: 0.6 + i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                      className="absolute right-0 top-0 h-full rounded-r-full"
-                      style={{ background: `linear-gradient(270deg, ${axis.rightColor}, ${axis.rightColor}88)` }}
-                    />
-                  </div>
-                  <p className="text-xs text-center mt-1" style={{ color: 'var(--color-text-subtle)' }}>
-                    {axis.left} ↔ {axis.right}
-                  </p>
-                </motion.div>
-              ))}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 1.2 + i * 0.1 }}
+                      className="mt-2 text-center"
+                    >
+                      <span
+                        className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full"
+                        style={{ background: `${dominantColor}15`, color: dominantColor }}
+                      >
+                        <span className="font-bold">{dominantLabel}</span>
+                        <span>優勢 ({dominantValue}%)</span>
+                      </span>
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
             </div>
 
             <p className="text-xs text-center mt-6" style={{ color: 'var(--color-text-subtle)' }}>

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { housingTypes } from '@/data/types';
+import TypeIllustration from '@/components/TypeIllustration';
 
 const typeGroups = [
   {
@@ -94,7 +95,9 @@ export default function TypesPage() {
                       className="card p-5 cursor-pointer"
                     >
                       <div className="flex items-start gap-4">
-                        <span className="text-3xl">{typeData.emoji}</span>
+                        <div className="flex-shrink-0">
+                          <TypeIllustration typeCode={typeKey} size="sm" animate={false} />
+                        </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <span
