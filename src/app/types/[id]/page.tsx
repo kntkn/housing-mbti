@@ -3,19 +3,8 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { housingTypes, axisLabels } from '@/data/types';
+import { housingTypes, tagLabels } from '@/data/types';
 import TypeIllustration from '@/components/TypeIllustration';
-
-// タイプコードから軸情報を取得
-const getAxisInfo = (typeCode: string) => {
-  const [a1, a2, a3, a4] = typeCode.split('-');
-  return [
-    { axis: 'FLOW_ANCHOR', value: a1, label: a1 === 'F' ? axisLabels.FLOW_ANCHOR.left : axisLabels.FLOW_ANCHOR.right, short: a1 === 'F' ? 'F' : 'A', color: a1 === 'F' ? 'var(--color-flow)' : 'var(--color-anchor)' },
-    { axis: 'FEEL_SPEC', value: a2, label: a2 === 'L' ? axisLabels.FEEL_SPEC.left : axisLabels.FEEL_SPEC.right, short: a2 === 'L' ? 'L' : 'S', color: a2 === 'L' ? 'var(--color-feel)' : 'var(--color-spec)' },
-    { axis: 'NEST_CITY', value: a3, label: a3 === 'N' ? axisLabels.NEST_CITY.left : axisLabels.NEST_CITY.right, short: a3 === 'N' ? 'N' : 'C', color: a3 === 'N' ? 'var(--color-nest)' : 'var(--color-city)' },
-    { axis: 'CALM_UPGRADE', value: a4, label: a4 === 'K' ? axisLabels.CALM_UPGRADE.left : axisLabels.CALM_UPGRADE.right, short: a4 === 'K' ? 'K' : 'U', color: a4 === 'K' ? 'var(--color-calm)' : 'var(--color-upgrade)' },
-  ];
-};
 
 export default function TypeDetailPage() {
   const params = useParams();
@@ -37,7 +26,17 @@ export default function TypeDetailPage() {
     );
   }
 
-  const axisInfo = getAxisInfo(typeCode);
+  // タグ一覧を生成
+  const allTags = [
+    tagLabels[typeData.tags.location] || typeData.tags.location,
+    tagLabels[typeData.tags.cost] || typeData.tags.cost,
+    ...typeData.tags.lifestyle.map(t => tagLabels[t] || t),
+    ...typeData.tags.building.map(t => tagLabels[t] || t),
+  ];
+
+  // 相性の良いタイプ・悪いタイプの情報を取得
+  const goodTypes = typeData.compatibility.good.map(id => housingTypes[id]).filter(Boolean);
+  const badTypes = typeData.compatibility.bad.map(id => housingTypes[id]).filter(Boolean);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
@@ -48,7 +47,7 @@ export default function TypeDetailPage() {
             ← タイプ一覧
           </Link>
           <span className="font-bold" style={{ color: 'var(--color-text)' }}>
-            {typeCode}
+            {typeData.emoji} {typeData.name}
           </span>
           <Link href="/test" className="text-sm font-medium" style={{ color: 'var(--color-accent)' }}>
             診断する
@@ -69,39 +68,31 @@ export default function TypeDetailPage() {
               <TypeIllustration typeCode={typeCode} size="lg" />
             </div>
 
-            {/* タイプコード */}
-            <span
-              className="inline-block px-4 py-1.5 rounded-full text-lg font-bold mb-4"
-              style={{ background: 'var(--color-accent)', color: 'white' }}
-            >
-              {typeCode}
-            </span>
-
             {/* タイプ名 */}
             <h1 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: 'var(--color-text)' }}>
-              {typeData.name}
+              {typeData.emoji} {typeData.name}
             </h1>
 
-            {/* キャッチコピー */}
+            {/* サブタイトル */}
             <p className="text-lg md:text-xl mb-6" style={{ color: 'var(--color-text-muted)' }}>
-              {typeData.oneLiner}
+              {typeData.subtitle}
             </p>
 
-            {/* 4軸バッジ */}
+            {/* タグバッジ */}
             <div className="flex flex-wrap justify-center gap-2">
-              {axisInfo.map((info) => (
+              {allTags.slice(0, 5).map((tag, i) => (
                 <span
-                  key={info.axis}
+                  key={i}
                   className="px-3 py-1.5 rounded-full text-sm font-medium"
-                  style={{ background: `${info.color}15`, color: info.color }}
+                  style={{ background: 'var(--color-bg-subtle)', color: 'var(--color-text-subtle)' }}
                 >
-                  {info.short}: {info.label}
+                  {tag}
                 </span>
               ))}
             </div>
           </motion.section>
 
-          {/* 特徴カード */}
+          {/* プロフィール */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -113,16 +104,20 @@ export default function TypeDetailPage() {
               style={{ background: 'linear-gradient(135deg, var(--color-surface) 0%, var(--color-bg-subtle) 100%)' }}
             >
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
-                <span className="text-2xl">🎯</span>
-                このタイプの特徴
+                <span className="text-2xl">📖</span>
+                プロフィール
               </h2>
-              <p className="text-base leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-                {typeData.decisionStyle}
-              </p>
+              <div className="space-y-3">
+                {typeData.profile.map((line, i) => (
+                  <p key={i} className="text-base leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+                    {line}
+                  </p>
+                ))}
+              </div>
             </div>
           </motion.section>
 
-          {/* 価値観 */}
+          {/* 傾向グラフ */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -130,29 +125,82 @@ export default function TypeDetailPage() {
             className="card p-6 md:p-8 mb-6"
           >
             <h2 className="text-xl font-bold mb-5 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
-              <span className="text-2xl">💎</span>
-              大切にしている価値観
+              <span className="text-2xl">📊</span>
+              傾向グラフ
             </h2>
-            <div className="grid gap-3">
-              {typeData.values.map((value, i) => (
-                <div
-                  key={i}
-                  className="flex items-start gap-3 p-3 rounded-lg"
-                  style={{ background: 'var(--color-bg-subtle)' }}
-                >
-                  <span
-                    className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ background: 'var(--color-accent)', color: 'white' }}
-                  >
-                    {i + 1}
+            <div className="space-y-6">
+              {/* 立地傾向 */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>立地傾向</span>
+                  <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                    {typeData.orientation.location.label}
                   </span>
-                  <span style={{ color: 'var(--color-text)' }}>{value}</span>
                 </div>
-              ))}
+                <div className="h-3 rounded-full overflow-hidden" style={{ background: 'var(--color-bg-subtle)' }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${typeData.orientation.location.value}%` }}
+                    transition={{ duration: 0.8, ease: 'easeOut' }}
+                    className="h-full rounded-full"
+                    style={{ background: 'linear-gradient(90deg, var(--color-accent), var(--color-secondary))' }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--color-text-subtle)' }}>
+                  <span>郊外</span>
+                  <span>都心</span>
+                </div>
+              </div>
+
+              {/* コスト傾向 */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>コスト傾向</span>
+                  <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                    {typeData.orientation.cost.label}
+                  </span>
+                </div>
+                <div className="h-3 rounded-full overflow-hidden" style={{ background: 'var(--color-bg-subtle)' }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${typeData.orientation.cost.value}%` }}
+                    transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
+                    className="h-full rounded-full"
+                    style={{ background: 'linear-gradient(90deg, var(--color-secondary), var(--color-accent))' }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--color-text-subtle)' }}>
+                  <span>広さ重視</span>
+                  <span>コスパ重視</span>
+                </div>
+              </div>
+
+              {/* ライフスタイル傾向 */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>生活リズム</span>
+                  <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                    {typeData.orientation.lifestyle.label}
+                  </span>
+                </div>
+                <div className="h-3 rounded-full overflow-hidden" style={{ background: 'var(--color-bg-subtle)' }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${typeData.orientation.lifestyle.value}%` }}
+                    transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
+                    className="h-full rounded-full"
+                    style={{ background: 'linear-gradient(90deg, #6366f1, #f59e0b)' }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs mt-1" style={{ color: 'var(--color-text-subtle)' }}>
+                  <span>夜型</span>
+                  <span>朝型</span>
+                </div>
+              </div>
             </div>
           </motion.section>
 
-          {/* 内見チェックポイント */}
+          {/* 5つの特徴 */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -160,114 +208,112 @@ export default function TypeDetailPage() {
             className="card p-6 md:p-8 mb-6"
           >
             <h2 className="text-xl font-bold mb-5 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
-              <span className="text-2xl">👀</span>
-              内見で見るべき3つのポイント
+              <span className="text-2xl">✨</span>
+              このタイプの5つの特徴
             </h2>
-            <div className="space-y-4">
-              {typeData.viewingChecks.map((check, i) => (
-                <div key={i} className="flex items-start gap-4">
-                  <div
-                    className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold"
+            <div className="grid gap-3">
+              {typeData.features.map((feature, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-3 p-3 rounded-lg"
+                  style={{ background: 'var(--color-bg-subtle)' }}
+                >
+                  <span
+                    className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                     style={{ background: 'var(--color-secondary)', color: 'white' }}
                   >
                     {i + 1}
-                  </div>
-                  <div className="flex-1 pt-2">
-                    <p style={{ color: 'var(--color-text)' }}>{check}</p>
-                  </div>
+                  </span>
+                  <span style={{ color: 'var(--color-text)' }}>{feature}</span>
                 </div>
               ))}
             </div>
           </motion.section>
 
-          {/* 地雷（要注意） */}
+          {/* メッセージ */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
             className="card p-6 md:p-8 mb-6"
-            style={{ background: 'rgba(199, 91, 57, 0.05)', borderColor: 'rgba(199, 91, 57, 0.2)' }}
+            style={{ background: 'linear-gradient(135deg, var(--color-accent)08 0%, var(--color-secondary)08 100%)' }}
           >
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: 'var(--color-accent)' }}>
-              <span className="text-2xl">⚠️</span>
-              やりがちな失敗（地雷）
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+              <span className="text-2xl">💬</span>
+              あなたへのメッセージ
             </h2>
-            <p className="text-base leading-relaxed" style={{ color: 'var(--color-text)' }}>
-              {typeData.pitfall}
+            <p
+              className="text-lg leading-relaxed"
+              style={{ color: 'var(--color-text)' }}
+            >
+              {typeData.message}
             </p>
           </motion.section>
 
-          {/* 相性のいい住まい条件 */}
+          {/* 相性 */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="card p-6 md:p-8 mb-6"
-          >
-            <h2 className="text-xl font-bold mb-5 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
-              <span className="text-2xl">🏠</span>
-              相性のいい住まい条件
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {typeData.housingTemplate.map((template, i) => (
-                <span
-                  key={i}
-                  className="px-4 py-2 rounded-full text-sm font-medium"
-                  style={{ background: 'var(--color-bg-subtle)', color: 'var(--color-text)', border: '1px solid var(--color-border)' }}
-                >
-                  {template}
-                </span>
-              ))}
-            </div>
-          </motion.section>
-
-          {/* 暮らし方のヒント */}
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="card p-6 md:p-8 mb-6"
-          >
-            <h2 className="text-xl font-bold mb-5 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
-              <span className="text-2xl">🔄</span>
-              相性のいい暮らし方
-            </h2>
-            <div className="space-y-3">
-              {typeData.livingOps.map((op, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <span className="text-lg" style={{ color: 'var(--color-secondary)' }}>✓</span>
-                  <span style={{ color: 'var(--color-text-muted)' }}>{op}</span>
-                </div>
-              ))}
-            </div>
-          </motion.section>
-
-          {/* このタイプの口癖 */}
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
             className="card p-6 md:p-8 mb-8"
           >
             <h2 className="text-xl font-bold mb-5 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
-              <span className="text-2xl">💬</span>
-              このタイプがよく言うセリフ
+              <span className="text-2xl">🤝</span>
+              タイプ相性
             </h2>
-            <div className="space-y-4">
-              {typeData.quotes.map((quote, i) => (
-                <div
-                  key={i}
-                  className="p-4 rounded-xl"
-                  style={{ background: 'var(--color-bg-subtle)' }}
-                >
-                  <p
-                    className="text-lg italic"
-                    style={{ color: 'var(--color-text)' }}
-                  >
-                    「{quote}」
-                  </p>
-                </div>
-              ))}
+
+            {/* 相性の良いタイプ */}
+            <div className="mb-6">
+              <h3 className="text-sm font-medium mb-3" style={{ color: 'var(--color-secondary)' }}>
+                💚 相性の良いタイプ
+              </h3>
+              <div className="grid gap-3">
+                {goodTypes.map((type) => (
+                  <Link key={type.id} href={`/types/${type.id}`}>
+                    <div
+                      className="flex items-center gap-3 p-3 rounded-lg transition-all hover:scale-[1.02]"
+                      style={{ background: 'var(--color-bg-subtle)' }}
+                    >
+                      <span className="text-2xl">{type.emoji}</span>
+                      <div>
+                        <p className="font-medium" style={{ color: 'var(--color-text)' }}>
+                          {type.name}
+                        </p>
+                        <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                          {type.subtitle}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* 相性の悪いタイプ */}
+            <div>
+              <h3 className="text-sm font-medium mb-3" style={{ color: 'var(--color-accent)' }}>
+                💔 ちょっと苦手なタイプ
+              </h3>
+              <div className="grid gap-3">
+                {badTypes.map((type) => (
+                  <Link key={type.id} href={`/types/${type.id}`}>
+                    <div
+                      className="flex items-center gap-3 p-3 rounded-lg transition-all hover:scale-[1.02]"
+                      style={{ background: 'var(--color-bg-subtle)' }}
+                    >
+                      <span className="text-2xl">{type.emoji}</span>
+                      <div>
+                        <p className="font-medium" style={{ color: 'var(--color-text)' }}>
+                          {type.name}
+                        </p>
+                        <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                          {type.subtitle}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
           </motion.section>
 
@@ -275,7 +321,7 @@ export default function TypeDetailPage() {
           <motion.section
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
+            transition={{ delay: 0.6 }}
             className="text-center"
           >
             <div className="section-divider" />
@@ -283,7 +329,7 @@ export default function TypeDetailPage() {
               あなたもこのタイプ？
             </h3>
             <p className="mb-6" style={{ color: 'var(--color-text-muted)' }}>
-              32問の診断であなたの住まいMBTIを発見しよう
+              15問の診断であなたのお部屋MBTIを発見しよう
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/test" className="btn-primary">
@@ -301,7 +347,7 @@ export default function TypeDetailPage() {
       <footer className="py-8 px-4" style={{ borderTop: '1px solid var(--color-border)' }}>
         <div className="max-w-3xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm" style={{ color: 'var(--color-text-subtle)' }}>
-            © 2024 住まいMBTI診断
+            © 2024 お部屋MBTI診断
           </p>
           <div className="flex items-center gap-6">
             <Link href="/" className="text-sm" style={{ color: 'var(--color-text-subtle)' }}>

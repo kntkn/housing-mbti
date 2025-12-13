@@ -7,9 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { questions, pageHeadings } from '@/data/questions';
 import { calculateScore, encodeAnswers, Answers } from '@/lib/scoring';
 
-const QUESTIONS_PER_PAGE = 8;
-const TOTAL_PAGES = Math.ceil(questions.length / QUESTIONS_PER_PAGE); // 32問 ÷ 8 = 4ページ
-const STORAGE_KEY = 'housing_mbti_answers_v1';
+const QUESTIONS_PER_PAGE = 5;
+const TOTAL_PAGES = Math.ceil(questions.length / QUESTIONS_PER_PAGE); // 15問 ÷ 5 = 3ページ
+const STORAGE_KEY = 'housing_mbti_answers_v2';
 
 export default function TestPage() {
   const router = useRouter();
@@ -70,8 +70,8 @@ export default function TestPage() {
     setShowResumeModal(false);
   };
 
-  const handleAnswer = (questionId: number, choice: 'A' | 'B') => {
-    setAnswers(prev => ({ ...prev, [questionId]: choice }));
+  const handleAnswer = (questionId: number, optionId: string) => {
+    setAnswers(prev => ({ ...prev, [questionId]: optionId }));
     setShowWarning(false);
   };
 
@@ -127,10 +127,10 @@ export default function TestPage() {
               ← 戻る
             </Link>
             <span className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
-              住まいMBTI診断
+              お部屋MBTI診断
             </span>
             <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-              進捗: {answeredCount}/72
+              {answeredCount}/{questions.length}問
             </span>
           </div>
           <div className="progress-bar">
@@ -150,11 +150,14 @@ export default function TestPage() {
             className="text-center mb-8"
           >
             <span className="type-badge mb-2">
-              第{currentPage}ブロック / {TOTAL_PAGES}
+              Part {currentPage} / {TOTAL_PAGES}
             </span>
             <h2 className="text-2xl font-bold mt-2" style={{ color: 'var(--color-text)' }}>
               {pageHeadings[currentPage] || '質問に答えてください'}
             </h2>
+            <p className="text-sm mt-2" style={{ color: 'var(--color-text-muted)' }}>
+              直感で選んでください
+            </p>
           </motion.div>
 
           {/* 質問リスト */}
@@ -165,7 +168,7 @@ export default function TestPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
-              className="space-y-6"
+              className="space-y-8"
             >
               {currentQuestions.map((question, index) => {
                 const isAnswered = !!answers[question.id];
@@ -190,28 +193,29 @@ export default function TestPage() {
                       >
                         Q{question.id}
                       </span>
-                      {showWarning && !isAnswered && (
-                        <span className="text-xs px-2 py-1 rounded-full" style={{ background: 'rgba(199, 91, 57, 0.1)', color: 'var(--color-accent)' }}>
-                          未回答
-                        </span>
-                      )}
+                      <div className="flex-1">
+                        <p className="font-medium text-lg" style={{ color: 'var(--color-text)' }}>
+                          {question.question}
+                        </p>
+                        {showWarning && !isAnswered && (
+                          <span className="inline-block text-xs px-2 py-1 rounded-full mt-2" style={{ background: 'rgba(199, 91, 57, 0.1)', color: 'var(--color-accent)' }}>
+                            未回答
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div className="grid gap-3">
-                      <button
-                        onClick={() => handleAnswer(question.id, 'A')}
-                        className={`choice-btn ${selected === 'A' ? 'selected' : ''}`}
-                      >
-                        <span className="font-bold mr-2">A.</span>
-                        {question.choiceA}
-                      </button>
-                      <button
-                        onClick={() => handleAnswer(question.id, 'B')}
-                        className={`choice-btn ${selected === 'B' ? 'selected' : ''}`}
-                      >
-                        <span className="font-bold mr-2">B.</span>
-                        {question.choiceB}
-                      </button>
+                      {question.options.map((option) => (
+                        <button
+                          key={option.id}
+                          onClick={() => handleAnswer(question.id, option.id)}
+                          className={`choice-btn ${selected === option.id ? 'selected' : ''}`}
+                        >
+                          <span className="font-bold mr-2 uppercase">{option.id}.</span>
+                          {option.text}
+                        </button>
+                      ))}
                     </div>
                   </motion.div>
                 );
@@ -249,12 +253,12 @@ export default function TestPage() {
           </button>
 
           <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-            Page {currentPage} / {TOTAL_PAGES}
+            {currentPage} / {TOTAL_PAGES}
           </span>
 
           {isLastPage ? (
             <button onClick={handleComplete} className="btn-primary px-6">
-              診断を完了する
+              診断結果を見る
             </button>
           ) : (
             <button onClick={handleNext} className="btn-primary px-6">

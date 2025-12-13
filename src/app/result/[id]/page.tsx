@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { housingTypes, axisLabels } from '@/data/types';
-import { decodeAnswers, calculateScore, ScoreResult, Answers } from '@/lib/scoring';
+import { housingTypes, tagLabels } from '@/data/types';
+import { decodeAnswers, calculateScore, ScoreResult, Answers, getTopMatches } from '@/lib/scoring';
 import TypeIllustration from '@/components/TypeIllustration';
 
-// サンプル結果用のダミーデータ（32問）
+// サンプル結果用のダミーデータ（15問）
 const sampleAnswers: Answers = Object.fromEntries(
-  Array.from({ length: 32 }, (_, i) => [i + 1, Math.random() > 0.5 ? 'A' : 'B'] as [number, 'A' | 'B'])
+  Array.from({ length: 15 }, (_, i) => [i + 1, ['a', 'b', 'c'][Math.floor(Math.random() * 3)]])
 );
 
 export default function ResultPage() {
@@ -43,12 +43,14 @@ export default function ResultPage() {
     );
   }
 
-  const typeData = housingTypes[result.typeCode];
+  const typeData = housingTypes[result.typeId];
+  const topMatches = getTopMatches(result.scores, 3);
 
   const handleShare = () => {
-    const text = `住まいMBTI：${result.typeCode}（${typeData?.name || '不明'}）
-4軸：F${result.percentages.flowAnchor.left}% A${result.percentages.flowAnchor.right}% / L${result.percentages.feelSpec.left}% S${result.percentages.feelSpec.right}% / N${result.percentages.nestCity.left}% C${result.percentages.nestCity.right}% / K${result.percentages.calmUpgrade.left}% U${result.percentages.calmUpgrade.right}%
-#住まいMBTI診断`;
+    const text = `お部屋MBTI診断の結果は…
+${typeData?.emoji || '🏠'} ${typeData?.name || result.typeId}
+「${typeData?.subtitle || ''}」
+#お部屋MBTI診断`;
 
     const url = window.location.href;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
@@ -60,40 +62,18 @@ export default function ResultPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const axisData = [
-    {
-      key: 'flowAnchor',
-      ...axisLabels.FLOW_ANCHOR,
-      leftValue: result.percentages.flowAnchor.left,
-      rightValue: result.percentages.flowAnchor.right,
-      leftColor: 'var(--color-flow)',
-      rightColor: 'var(--color-anchor)',
-    },
-    {
-      key: 'feelSpec',
-      ...axisLabels.FEEL_SPEC,
-      leftValue: result.percentages.feelSpec.left,
-      rightValue: result.percentages.feelSpec.right,
-      leftColor: 'var(--color-feel)',
-      rightColor: 'var(--color-spec)',
-    },
-    {
-      key: 'nestCity',
-      ...axisLabels.NEST_CITY,
-      leftValue: result.percentages.nestCity.left,
-      rightValue: result.percentages.nestCity.right,
-      leftColor: 'var(--color-nest)',
-      rightColor: 'var(--color-city)',
-    },
-    {
-      key: 'calmUpgrade',
-      ...axisLabels.CALM_UPGRADE,
-      leftValue: result.percentages.calmUpgrade.left,
-      rightValue: result.percentages.calmUpgrade.right,
-      leftColor: 'var(--color-calm)',
-      rightColor: 'var(--color-upgrade)',
-    },
-  ];
+  if (!typeData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-bg)' }}>
+        <div className="text-center">
+          <p style={{ color: 'var(--color-text-muted)' }}>タイプが見つかりません</p>
+          <Link href="/test" className="btn-primary mt-4">
+            診断をやり直す
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
@@ -120,256 +100,296 @@ export default function ResultPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-center py-12"
           >
-            <p className="text-sm mb-2" style={{ color: 'var(--color-text-muted)' }}>
-              あなたの住まいMBTIは…
+            <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)' }}>
+              あなたのお部屋タイプは…
             </p>
+
+            {/* タイプイラスト */}
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2 }}
+              className="flex justify-center mb-6"
             >
-              <span className="text-5xl md:text-6xl font-bold" style={{ color: 'var(--color-accent)' }}>
-                {result.typeCode}
-              </span>
+              <TypeIllustration typeCode={result.typeId} size="lg" />
             </motion.div>
 
-            {typeData && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                {/* タイプイラスト */}
-                <div className="flex justify-center my-6">
-                  <TypeIllustration typeCode={result.typeCode} size="lg" />
-                </div>
-                <h1 className="text-2xl md:text-3xl font-bold mt-4 mb-2" style={{ color: 'var(--color-text)' }}>
-                  {typeData.name}
-                </h1>
-                <p className="text-lg" style={{ color: 'var(--color-text-muted)' }}>
-                  {typeData.oneLiner}
-                </p>
-              </motion.div>
-            )}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--color-text)' }}>
+                {typeData.name}
+              </h1>
+              <p className="text-lg mb-4" style={{ color: 'var(--color-accent)' }}>
+                {typeData.subtitle}
+              </p>
+
+              {/* タグ表示 */}
+              <div className="flex flex-wrap justify-center gap-2 mt-4">
+                <span
+                  className="px-3 py-1 rounded-full text-sm"
+                  style={{ background: 'var(--color-bg-subtle)', color: 'var(--color-text-muted)' }}
+                >
+                  {tagLabels[typeData.tags.location] || typeData.tags.location}
+                </span>
+                <span
+                  className="px-3 py-1 rounded-full text-sm"
+                  style={{ background: 'var(--color-bg-subtle)', color: 'var(--color-text-muted)' }}
+                >
+                  {tagLabels[typeData.tags.cost] || typeData.tags.cost}
+                </span>
+                {typeData.tags.security === 'High' && (
+                  <span
+                    className="px-3 py-1 rounded-full text-sm"
+                    style={{ background: 'var(--color-bg-subtle)', color: 'var(--color-text-muted)' }}
+                  >
+                    {tagLabels.High}
+                  </span>
+                )}
+              </div>
+            </motion.div>
           </motion.section>
 
-          {/* 4軸チャート */}
+          {/* プロフィール */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="card p-6 mb-8"
+            className="card p-6 mb-6"
+          >
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+              <span className="text-2xl">{typeData.emoji}</span>
+              プロフィール
+            </h2>
+            <div className="space-y-3">
+              {typeData.profile.map((line, i) => (
+                <p key={i} style={{ color: 'var(--color-text-muted)' }}>
+                  {line}
+                </p>
+              ))}
+            </div>
+          </motion.section>
+
+          {/* オリエンテーショングラフ */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="card p-6 mb-6"
           >
             <h2 className="text-xl font-bold mb-6 text-center" style={{ color: 'var(--color-text)' }}>
-              4軸の割合
+              傾向グラフ
             </h2>
 
             <div className="space-y-6">
-              {axisData.map((axis) => {
-                const isLeftDominant = axis.leftValue >= axis.rightValue;
-                const dominantColor = isLeftDominant ? axis.leftColor : axis.rightColor;
-                const dominantLabel = isLeftDominant ? axis.leftShort : axis.rightShort;
+              {/* 立地 */}
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>郊外</span>
+                  <span className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
+                    {typeData.orientation.location.label}
+                  </span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>都心</span>
+                </div>
+                <div className="h-4 rounded-full overflow-hidden" style={{ background: 'var(--color-bg-subtle)' }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-1000"
+                    style={{
+                      width: `${typeData.orientation.location.value}%`,
+                      background: 'linear-gradient(90deg, #4CAF50 0%, #2196F3 100%)',
+                    }}
+                  />
+                </div>
+              </div>
 
+              {/* コスト */}
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>広さ重視</span>
+                  <span className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
+                    {typeData.orientation.cost.label}
+                  </span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>コスパ重視</span>
+                </div>
+                <div className="h-4 rounded-full overflow-hidden" style={{ background: 'var(--color-bg-subtle)' }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-1000"
+                    style={{
+                      width: `${typeData.orientation.cost.value}%`,
+                      background: 'linear-gradient(90deg, #9C27B0 0%, #FF9800 100%)',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* ライフスタイル */}
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>夜型</span>
+                  <span className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
+                    {typeData.orientation.lifestyle.label}
+                  </span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>朝型</span>
+                </div>
+                <div className="h-4 rounded-full overflow-hidden" style={{ background: 'var(--color-bg-subtle)' }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-1000"
+                    style={{
+                      width: `${typeData.orientation.lifestyle.value}%`,
+                      background: 'linear-gradient(90deg, #673AB7 0%, #FFC107 100%)',
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* 5つの特徴 */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="card p-6 mb-6"
+          >
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+              <span className="text-2xl">✨</span>
+              5つの特徴
+            </h2>
+            <ul className="space-y-3">
+              {typeData.features.map((feature, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span
+                    className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{ background: 'var(--color-secondary)', color: 'white' }}
+                  >
+                    {i + 1}
+                  </span>
+                  <span style={{ color: 'var(--color-text-muted)' }}>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </motion.section>
+
+          {/* メッセージ */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="card p-6 mb-6"
+            style={{ background: 'linear-gradient(135deg, var(--color-surface) 0%, var(--color-bg-subtle) 100%)' }}
+          >
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+              <span className="text-2xl">💌</span>
+              あなたへのメッセージ
+            </h2>
+            <p className="text-lg leading-relaxed" style={{ color: 'var(--color-text)' }}>
+              {typeData.message}
+            </p>
+          </motion.section>
+
+          {/* 相性 */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="card p-6 mb-6"
+          >
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+              <span className="text-2xl">🤝</span>
+              相性のいいタイプ
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              {typeData.compatibility.good.map((typeId) => {
+                const compatType = housingTypes[typeId];
+                if (!compatType) return null;
                 return (
-                  <div key={axis.key} className="relative">
-                    {/* 軸ラベル（上部） */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="w-2.5 h-2.5 rounded-full"
-                          style={{ background: axis.leftColor }}
-                        />
-                        <span className="text-sm font-bold" style={{ color: axis.leftColor }}>
-                          {axis.leftShort}
-                        </span>
-                        <span className="text-xs" style={{ color: 'var(--color-text-subtle)' }}>
-                          {axis.left}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs" style={{ color: 'var(--color-text-subtle)' }}>
-                          {axis.right}
-                        </span>
-                        <span className="text-sm font-bold" style={{ color: axis.rightColor }}>
-                          {axis.rightShort}
-                        </span>
-                        <span
-                          className="w-2.5 h-2.5 rounded-full"
-                          style={{ background: axis.rightColor }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* バーグラフ（両端から伸びて中央でぶつかる） */}
-                    <div className="relative h-10 rounded-lg overflow-hidden" style={{ background: 'var(--color-bg-subtle)' }}>
-                      {/* 左側のバー（左端から伸びる） */}
-                      <div
-                        className="absolute left-0 top-0 h-full flex items-center justify-start pl-2"
-                        style={{
-                          width: `${axis.leftValue}%`,
-                          background: `linear-gradient(90deg, ${axis.leftColor} 0%, ${axis.leftColor}dd 100%)`,
-                        }}
-                      >
-                        <span className="text-white text-xs font-bold drop-shadow-sm">
-                          {axis.leftValue}%
-                        </span>
-                      </div>
-                      {/* 右側のバー（右端から伸びる） */}
-                      <div
-                        className="absolute right-0 top-0 h-full flex items-center justify-end pr-2"
-                        style={{
-                          width: `${axis.rightValue}%`,
-                          background: `linear-gradient(270deg, ${axis.rightColor} 0%, ${axis.rightColor}dd 100%)`,
-                        }}
-                      >
-                        <span className="text-white text-xs font-bold drop-shadow-sm">
-                          {axis.rightValue}%
-                        </span>
-                      </div>
-                      {/* 境界線（ぶつかるポイント） */}
-                      <div
-                        className="absolute top-0 h-full w-0.5 bg-white/80 shadow-lg"
-                        style={{ left: `${axis.leftValue}%`, transform: 'translateX(-50%)' }}
-                      />
-                    </div>
-
-                    {/* 優勢タイプバッジ */}
-                    <div className="mt-1.5 text-center">
-                      <span
-                        className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium"
-                        style={{ background: `${dominantColor}15`, color: dominantColor }}
-                      >
-                        {dominantLabel}寄り
-                      </span>
-                    </div>
-                  </div>
+                  <Link
+                    key={typeId}
+                    href={`/types/${typeId}`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full transition-all hover:scale-105"
+                    style={{ background: 'var(--color-bg-subtle)' }}
+                  >
+                    <span className="text-xl">{compatType.emoji}</span>
+                    <span className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
+                      {compatType.name}
+                    </span>
+                  </Link>
                 );
               })}
             </div>
 
-            <p className="text-xs text-center mt-6" style={{ color: 'var(--color-text-subtle)' }}>
-              ※ %はこの診断内の相対値です
-            </p>
+            <h3 className="text-lg font-bold mt-6 mb-3" style={{ color: 'var(--color-accent)' }}>
+              注意が必要なタイプ
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {typeData.compatibility.bad.map((typeId) => {
+                const compatType = housingTypes[typeId];
+                if (!compatType) return null;
+                return (
+                  <Link
+                    key={typeId}
+                    href={`/types/${typeId}`}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full transition-all hover:scale-105"
+                    style={{ background: 'rgba(199, 91, 57, 0.1)' }}
+                  >
+                    <span className="text-xl">{compatType.emoji}</span>
+                    <span className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
+                      {compatType.name}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
           </motion.section>
 
-          {/* タイプ詳細 */}
-          {typeData && (
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="space-y-6"
-            >
-              {/* 価値観 */}
-              <div className="card p-6">
-                <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text)' }}>
-                  💎 価値観（何を優先するか）
-                </h3>
-                <ul className="space-y-2">
-                  {typeData.values.map((value, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span style={{ color: 'var(--color-accent)' }}>•</span>
-                      <span style={{ color: 'var(--color-text-muted)' }}>{value}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* 決め方 */}
-              <div className="card p-6">
-                <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text)' }}>
-                  🧭 決め方（判断プロセス）
-                </h3>
-                <p style={{ color: 'var(--color-text-muted)' }}>{typeData.decisionStyle}</p>
-              </div>
-
-              {/* 内見チェック */}
-              <div className="card p-6">
-                <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text)' }}>
-                  👀 内見で見るべき3点
-                </h3>
-                <ul className="space-y-3">
-                  {typeData.viewingChecks.map((check, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <span
-                        className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                        style={{ background: 'var(--color-secondary)', color: 'white' }}
-                      >
-                        {i + 1}
-                      </span>
-                      <span style={{ color: 'var(--color-text-muted)' }}>{check}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* 地雷 */}
-              <div className="card p-6" style={{ background: 'rgba(199, 91, 57, 0.05)', borderColor: 'rgba(199, 91, 57, 0.2)' }}>
-                <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-accent)' }}>
-                  ⚠️ 地雷（やりがちな失敗）
-                </h3>
-                <p style={{ color: 'var(--color-text)' }}>{typeData.pitfall}</p>
-              </div>
-
-              {/* 住まい条件テンプレ */}
-              <div className="card p-6">
-                <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text)' }}>
-                  🏠 相性のいい住まい条件
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {typeData.housingTemplate.map((template, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1.5 rounded-full text-sm"
-                      style={{ background: 'var(--color-bg-subtle)', color: 'var(--color-text-muted)' }}
-                    >
-                      {template}
+          {/* 他の候補タイプ */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.75 }}
+            className="card p-6 mb-8"
+          >
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+              <span className="text-2xl">🎯</span>
+              あなたに近いタイプ
+            </h2>
+            <div className="grid gap-3">
+              {topMatches.slice(1).map((typeId, i) => {
+                const matchType = housingTypes[typeId];
+                if (!matchType) return null;
+                return (
+                  <Link
+                    key={typeId}
+                    href={`/types/${typeId}`}
+                    className="flex items-center gap-4 p-3 rounded-xl transition-all hover:scale-[1.02]"
+                    style={{ background: 'var(--color-bg-subtle)' }}
+                  >
+                    <span className="text-3xl">{matchType.emoji}</span>
+                    <div className="flex-1">
+                      <p className="font-bold" style={{ color: 'var(--color-text)' }}>
+                        {matchType.name}
+                      </p>
+                      <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                        {matchType.subtitle}
+                      </p>
+                    </div>
+                    <span className="text-xs px-2 py-1 rounded-full" style={{ background: 'var(--color-surface)', color: 'var(--color-text-subtle)' }}>
+                      #{i + 2}
                     </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* 運用スタイル */}
-              <div className="card p-6">
-                <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text)' }}>
-                  🔄 相性のいい暮らし方（運用）
-                </h3>
-                <ul className="space-y-2">
-                  {typeData.livingOps.map((op, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span style={{ color: 'var(--color-secondary)' }}>✓</span>
-                      <span style={{ color: 'var(--color-text-muted)' }}>{op}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* 口癖 */}
-              <div className="card p-6">
-                <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text)' }}>
-                  💬 このタイプの口癖
-                </h3>
-                <div className="space-y-3">
-                  {typeData.quotes.map((quote, i) => (
-                    <p
-                      key={i}
-                      className="pl-4 border-l-2 italic"
-                      style={{ borderColor: 'var(--color-accent)', color: 'var(--color-text-muted)' }}
-                    >
-                      「{quote}」
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </motion.section>
-          )}
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.section>
 
           {/* シェア導線 */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            className="mt-12 text-center"
+            transition={{ delay: 0.8 }}
+            className="text-center"
           >
             <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text)' }}>
               結果をシェアする
@@ -406,7 +426,7 @@ export default function ResultPage() {
                 もう一度診断する
               </Link>
               <Link href="/types" className="btn-secondary">
-                全16タイプを見る
+                全24タイプを見る
               </Link>
             </div>
           </motion.section>
@@ -417,7 +437,7 @@ export default function ResultPage() {
       <footer className="py-8 px-4" style={{ borderTop: '1px solid var(--color-border)' }}>
         <div className="max-w-3xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm" style={{ color: 'var(--color-text-subtle)' }}>
-            © 2024 住まいMBTI診断
+            © 2024 お部屋MBTI診断
           </p>
           <div className="flex items-center gap-6">
             <Link href="/" className="text-sm" style={{ color: 'var(--color-text-subtle)' }}>

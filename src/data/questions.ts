@@ -1,62 +1,390 @@
-export type Axis = 'FLOW_ANCHOR' | 'FEEL_SPEC' | 'NEST_CITY' | 'CALM_UPGRADE';
-export type Pole = 'F' | 'A' | 'L' | 'S' | 'N' | 'C' | 'K' | 'U';
+// 15問の診断質問データ
+
+export interface QuestionOption {
+  id: string;
+  text: string;
+  tags: {
+    location?: string;
+    cost?: string;
+    lifestyle?: string[];
+    building?: string[];
+    security?: string;
+    screening?: string;
+  };
+}
 
 export interface Question {
   id: number;
-  axis: Axis;
-  choiceA: string;
-  choiceB: string;
-  scoreA: Pole;
-  scoreB: Pole;
+  category: string;
+  question: string;
+  options: QuestionOption[];
 }
 
-// 32問に厳選（各軸8問）- すべて「住まい選び」に明確フォーカス
 export const questions: Question[] = [
-  // Q1-Q8: Flow ↔ Anchor（住み替え派 vs 拠点派）
-  { id: 1, axis: 'FLOW_ANCHOR', choiceA: '合わなければ数年で引っ越す前提で選ぶ', choiceB: '長く住み続ける未来が見えないと決めにくい', scoreA: 'F', scoreB: 'A' },
-  { id: 2, axis: 'FLOW_ANCHOR', choiceA: '契約更新や引越しの手間は許容できる', choiceB: '手間が増えるなら最初から腰を据えたい', scoreA: 'F', scoreB: 'A' },
-  { id: 3, axis: 'FLOW_ANCHOR', choiceA: 'その街に飽きる可能性を前提に部屋を選ぶ', choiceB: 'その街で長く暮らす可能性を前提に部屋を選ぶ', scoreA: 'F', scoreB: 'A' },
-  { id: 4, axis: 'FLOW_ANCHOR', choiceA: '「一旦住んでみる」で決めることが多い', choiceB: '「最初から当たりを引きたい」と考える', scoreA: 'F', scoreB: 'A' },
-  { id: 5, axis: 'FLOW_ANCHOR', choiceA: '転職・結婚などに備えて住み替えやすさを重視', choiceB: 'ライフイベントがあっても住み続けられる家を選ぶ', scoreA: 'F', scoreB: 'A' },
-  { id: 6, axis: 'FLOW_ANCHOR', choiceA: '引っ越しで気分転換するのは良いこと', choiceB: '同じ場所で暮らしを整えるのが好き', scoreA: 'F', scoreB: 'A' },
-  { id: 7, axis: 'FLOW_ANCHOR', choiceA: '今の生活に合えば十分', choiceB: '5年後・10年後も見越して選びたい', scoreA: 'F', scoreB: 'A' },
-  { id: 8, axis: 'FLOW_ANCHOR', choiceA: '住まいは軽く構えたい', choiceB: '住まいはしっかり構えたい', scoreA: 'F', scoreB: 'A' },
+  // Q1: 立地（都心 vs 郊外）
+  {
+    id: 1,
+    category: 'location',
+    question: '住みたいエリアは、次のうちどっち派？',
+    options: [
+      {
+        id: 'a',
+        text: '駅チカ・繁華街が近い「都心」',
+        tags: { location: 'Urban' },
+      },
+      {
+        id: 'b',
+        text: '静かで落ち着いた「郊外・住宅街」',
+        tags: { location: 'Quiet' },
+      },
+      {
+        id: 'c',
+        text: 'どちらでもOK、バランス派',
+        tags: { location: 'Mid' },
+      },
+    ],
+  },
 
-  // Q9-Q16: Feel ↔ Spec（感性派 vs 条件派）
-  { id: 9, axis: 'FEEL_SPEC', choiceA: '内見は体感がすべて', choiceB: '内見は確認作業（条件でほぼ決まっている）', scoreA: 'L', scoreB: 'S' },
-  { id: 10, axis: 'FEEL_SPEC', choiceA: '写真や間取りより「現地の空気」で決める', choiceB: '現地に行く前に条件で絞り切る', scoreA: 'L', scoreB: 'S' },
-  { id: 11, axis: 'FEEL_SPEC', choiceA: '日当たり・匂い・音などの印象で好き嫌いが決まる', choiceB: '築年・面積・駅距離など数値で合否が決まる', scoreA: 'L', scoreB: 'S' },
-  { id: 12, axis: 'FEEL_SPEC', choiceA: '「なんか良い」で決断できる', choiceB: '「なぜ良いか」を説明できないと不安', scoreA: 'L', scoreB: 'S' },
-  { id: 13, axis: 'FEEL_SPEC', choiceA: '条件が少し悪くても雰囲気が良ければ選ぶ', choiceB: '雰囲気が良くても条件が悪いと候補から外す', scoreA: 'L', scoreB: 'S' },
-  { id: 14, axis: 'FEEL_SPEC', choiceA: '間取り図だけではピンとこない', choiceB: '間取り図でほぼ判断できる', scoreA: 'L', scoreB: 'S' },
-  { id: 15, axis: 'FEEL_SPEC', choiceA: '内見でテンションが上がったら即決もあり', choiceB: '内見でテンションが上がっても冷静に比較する', scoreA: 'L', scoreB: 'S' },
-  { id: 16, axis: 'FEEL_SPEC', choiceA: '生活のイメージが湧くかどうかが決め手', choiceB: '条件と数字が揃っているかが決め手', scoreA: 'L', scoreB: 'S' },
+  // Q2: 家賃 vs 広さ
+  {
+    id: 2,
+    category: 'cost',
+    question: '家賃と広さ、どっちを優先する？',
+    options: [
+      {
+        id: 'a',
+        text: '家賃を抑えたい！狭くても安いほうがいい',
+        tags: { cost: 'Rent Strict' },
+      },
+      {
+        id: 'b',
+        text: '広さ・ゆとり優先！少し高くても余裕のある部屋がいい',
+        tags: { cost: 'Size Priority' },
+      },
+    ],
+  },
 
-  // Q17-Q24: Nest ↔ City（家派 vs 街派）
-  { id: 17, axis: 'NEST_CITY', choiceA: '家にいる時間を充実させたい', choiceB: '外（街）で過ごす時間を充実させたい', scoreA: 'N', scoreB: 'C' },
-  { id: 18, axis: 'NEST_CITY', choiceA: '多少不便でも家が広い・快適な方がいい', choiceB: '多少狭くても駅近・立地が良い方がいい', scoreA: 'N', scoreB: 'C' },
-  { id: 19, axis: 'NEST_CITY', choiceA: '家の快適さにお金をかけたい', choiceB: 'アクセスの良さにお金をかけたい', scoreA: 'N', scoreB: 'C' },
-  { id: 20, axis: 'NEST_CITY', choiceA: '家の中の導線や居心地が気になる', choiceB: '徒歩圏の店・施設の充実度が気になる', scoreA: 'N', scoreB: 'C' },
-  { id: 21, axis: 'NEST_CITY', choiceA: '休日は家でゆっくり過ごしたい', choiceB: '休日は街に出かけたい', scoreA: 'N', scoreB: 'C' },
-  { id: 22, axis: 'NEST_CITY', choiceA: '家に人を呼べる余裕が欲しい', choiceB: '人とは外で会えばいいので家は最低限でOK', scoreA: 'N', scoreB: 'C' },
-  { id: 23, axis: 'NEST_CITY', choiceA: '部屋の広さは満足度に直結する', choiceB: '部屋は寝られれば十分、外に出やすいのが大事', scoreA: 'N', scoreB: 'C' },
-  { id: 24, axis: 'NEST_CITY', choiceA: '生活は家中心で組みたい', choiceB: '生活は街中心で組みたい', scoreA: 'N', scoreB: 'C' },
+  // Q3: 初期費用
+  {
+    id: 3,
+    category: 'lifestyle',
+    question: '引越しの初期費用について、当てはまるのは？',
+    options: [
+      {
+        id: 'a',
+        text: '敷金礼金0・フリーレントが絶対条件',
+        tags: { lifestyle: ['Low Initial'] },
+      },
+      {
+        id: 'b',
+        text: '初期費用より月々の家賃を重視',
+        tags: {},
+      },
+    ],
+  },
 
-  // Q25-Q32: Calm ↔ Upgrade（安定派 vs 改善派）
-  { id: 25, axis: 'CALM_UPGRADE', choiceA: '住まいのトラブル（騒音・設備故障など）は絶対避けたい', choiceB: '多少のトラブルは運用で対処できる', scoreA: 'K', scoreB: 'U' },
-  { id: 26, axis: 'CALM_UPGRADE', choiceA: '管理がしっかりした物件が安心', choiceB: '自分で工夫できる余地がある物件が楽しい', scoreA: 'K', scoreB: 'U' },
-  { id: 27, axis: 'CALM_UPGRADE', choiceA: '住まいは「疲れない」ことが最重要', choiceB: '住まいは「もっと良くできる」余地が欲しい', scoreA: 'K', scoreB: 'U' },
-  { id: 28, axis: 'CALM_UPGRADE', choiceA: '今のままで十分満足できる', choiceB: '住みながら改善していきたい', scoreA: 'K', scoreB: 'U' },
-  { id: 29, axis: 'CALM_UPGRADE', choiceA: '設備が壊れたり直したりは面倒', choiceB: '直したり整えたりするのは嫌いじゃない', scoreA: 'K', scoreB: 'U' },
-  { id: 30, axis: 'CALM_UPGRADE', choiceA: '家のことにあまり時間を使いたくない', choiceB: '家のことに時間をかけるのも悪くない', scoreA: 'K', scoreB: 'U' },
-  { id: 31, axis: 'CALM_UPGRADE', choiceA: 'DIYや模様替えは面倒に感じる', choiceB: 'DIYや模様替えは楽しい', scoreA: 'K', scoreB: 'U' },
-  { id: 32, axis: 'CALM_UPGRADE', choiceA: '完成された物件をそのまま使いたい', choiceB: '自分好みにカスタマイズしていきたい', scoreA: 'K', scoreB: 'U' },
+  // Q4: 生活リズム
+  {
+    id: 4,
+    category: 'lifestyle',
+    question: '自分の生活リズムは？',
+    options: [
+      {
+        id: 'a',
+        text: '朝型。朝から活動する派',
+        tags: {},
+      },
+      {
+        id: 'b',
+        text: '夜型。夜に集中できる・深夜帰宅が多い',
+        tags: { lifestyle: ['Night Owls'] },
+      },
+    ],
+  },
+
+  // Q5: 日当たり
+  {
+    id: 5,
+    category: 'lifestyle',
+    question: '日当たりの重要度は？',
+    options: [
+      {
+        id: 'a',
+        text: '超重要！日差しがないと気分が沈む',
+        tags: { lifestyle: ['Sunny'] },
+      },
+      {
+        id: 'b',
+        text: 'あれば嬉しいけど、そこまでこだわらない',
+        tags: {},
+      },
+    ],
+  },
+
+  // Q6: 風通し
+  {
+    id: 6,
+    category: 'lifestyle',
+    question: '風通し・換気について、どれが近い？',
+    options: [
+      {
+        id: 'a',
+        text: '風が通らないと息が詰まる。換気重視！',
+        tags: { lifestyle: ['Ventilation Priority'] },
+      },
+      {
+        id: 'b',
+        text: '特に気にしない。エアコンがあればOK',
+        tags: {},
+      },
+    ],
+  },
+
+  // Q7: 内装・デザイン
+  {
+    id: 7,
+    category: 'lifestyle',
+    question: '内装・デザインへのこだわりは？',
+    options: [
+      {
+        id: 'a',
+        text: 'こだわりあり！見た目・雰囲気・質感が大事',
+        tags: { lifestyle: ['Design Priority'] },
+      },
+      {
+        id: 'b',
+        text: '清潔ならOK。デザインより設備を優先',
+        tags: { lifestyle: ['Equipment'] },
+      },
+      {
+        id: 'c',
+        text: 'どちらも気にしない',
+        tags: {},
+      },
+    ],
+  },
+
+  // Q8: 建物の築年数
+  {
+    id: 8,
+    category: 'building',
+    question: '建物の築年数について、許容範囲は？',
+    options: [
+      {
+        id: 'a',
+        text: '築浅・新築じゃないと不安',
+        tags: { building: ['Newer'] },
+      },
+      {
+        id: 'b',
+        text: 'RC造・構造がしっかりしてれば築古でもOK',
+        tags: { building: ['Retro OK'], lifestyle: ['Structure Priority'] },
+      },
+      {
+        id: 'c',
+        text: 'リノベされていれば築古でも気にならない',
+        tags: { building: ['Retro OK', 'Renovation'] },
+      },
+    ],
+  },
+
+  // Q9: ペット
+  {
+    id: 9,
+    category: 'lifestyle',
+    question: 'ペットを飼う予定はある？',
+    options: [
+      {
+        id: 'a',
+        text: 'ある！ペット可物件じゃないとダメ',
+        tags: { lifestyle: ['Pets Priority'] },
+      },
+      {
+        id: 'b',
+        text: '飼わない or 飼う予定なし',
+        tags: {},
+      },
+    ],
+  },
+
+  // Q10: 荷物の量
+  {
+    id: 10,
+    category: 'lifestyle',
+    question: '自分の荷物の量は？',
+    options: [
+      {
+        id: 'a',
+        text: '少ない！ミニマリスト寄り',
+        tags: { lifestyle: ['Minimal'] },
+      },
+      {
+        id: 'b',
+        text: '多め…収納や広さがないと厳しい',
+        tags: { cost: 'Size Priority' },
+      },
+      {
+        id: 'c',
+        text: '普通。特に困ってない',
+        tags: {},
+      },
+    ],
+  },
+
+  // Q11: 静かさ・ストレス
+  {
+    id: 11,
+    category: 'lifestyle',
+    question: '騒音や周囲の環境について、どれが近い？',
+    options: [
+      {
+        id: 'a',
+        text: '騒音がストレス。静かな環境が絶対条件',
+        tags: { lifestyle: ['Stress Avoidance'], location: 'Quiet' },
+      },
+      {
+        id: 'b',
+        text: '多少うるさくても気にならない',
+        tags: {},
+      },
+    ],
+  },
+
+  // Q12: セキュリティ
+  {
+    id: 12,
+    category: 'security',
+    question: '防犯・セキュリティへのこだわりは？',
+    options: [
+      {
+        id: 'a',
+        text: 'オートロック・防犯カメラなど必須',
+        tags: { security: 'High' },
+      },
+      {
+        id: 'b',
+        text: '普通でOK。治安が悪くなければ大丈夫',
+        tags: { security: 'Normal' },
+      },
+    ],
+  },
+
+  // Q13: 移動・フットワーク
+  {
+    id: 13,
+    category: 'lifestyle',
+    question: '日常の移動について、当てはまるのは？',
+    options: [
+      {
+        id: 'a',
+        text: '移動が多い。駅近・アクセス最優先',
+        tags: { lifestyle: ['Mobility Priority'], location: 'Urban' },
+      },
+      {
+        id: 'b',
+        text: '在宅多め or 移動は多くない',
+        tags: {},
+      },
+    ],
+  },
+
+  // Q14: シェアハウス
+  {
+    id: 14,
+    category: 'lifestyle',
+    question: 'シェアハウスに住むのはアリ？',
+    options: [
+      {
+        id: 'a',
+        text: 'アリ！人と暮らすのは楽しい',
+        tags: { lifestyle: ['Social'] },
+      },
+      {
+        id: 'b',
+        text: 'ナシ。一人で暮らしたい',
+        tags: {},
+      },
+    ],
+  },
+
+  // Q15: 審査不安
+  {
+    id: 15,
+    category: 'screening',
+    question: '入居審査への不安はある？',
+    options: [
+      {
+        id: 'a',
+        text: 'ない。安定収入・保証人あり',
+        tags: { screening: 'Low' },
+      },
+      {
+        id: 'b',
+        text: '少しある。転職直後・フリーランスなど',
+        tags: { screening: 'Mid' },
+      },
+      {
+        id: 'c',
+        text: 'かなり不安。審査が通りやすい物件優先',
+        tags: { screening: 'High' },
+      },
+    ],
+  },
 ];
 
-// ページごとの見出し（32問 = 8問×4ページ）
+// ページごとの見出し（15問 = 5問×3ページ）
 export const pageHeadings: Record<number, string> = {
-  1: '住み替え派？それとも拠点派？',
-  2: '感性で選ぶ？条件で選ぶ？',
-  3: '家が大事？街が大事？',
-  4: '安定重視？改善したい？',
+  1: 'エリア・コスト・ライフスタイル',
+  2: '住まいへのこだわり',
+  3: '生活環境・審査',
 };
+
+// 回答からタグを集計する関数
+export function aggregateTags(answers: Record<number, string>): {
+  location: string[];
+  cost: string[];
+  lifestyle: string[];
+  building: string[];
+  security: string[];
+  screening: string[];
+} {
+  const result = {
+    location: [] as string[],
+    cost: [] as string[],
+    lifestyle: [] as string[],
+    building: [] as string[],
+    security: [] as string[],
+    screening: [] as string[],
+  };
+
+  questions.forEach((q) => {
+    const selectedOptionId = answers[q.id];
+    if (!selectedOptionId) return;
+
+    const selectedOption = q.options.find((opt) => opt.id === selectedOptionId);
+    if (!selectedOption) return;
+
+    const { tags } = selectedOption;
+
+    if (tags.location) {
+      result.location.push(tags.location);
+    }
+    if (tags.cost) {
+      result.cost.push(tags.cost);
+    }
+    if (tags.lifestyle) {
+      result.lifestyle.push(...tags.lifestyle);
+    }
+    if (tags.building) {
+      result.building.push(...tags.building);
+    }
+    if (tags.security) {
+      result.security.push(tags.security);
+    }
+    if (tags.screening) {
+      result.screening.push(tags.screening);
+    }
+  });
+
+  return result;
+}
