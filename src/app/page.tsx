@@ -16,18 +16,21 @@ const stagger = {
   },
 };
 
+// 動物キャラクターのサンプル表示用
+const sampleAnimals = ['🦊', '🐰', '🐧', '🦉', '🐨', '🦎', '🐹', '🐶'];
+
 export default function Home() {
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #FFF8F0 0%, #FFFBF7 50%, #F8F6FF 100%)' }}>
       {/* ヘッダー */}
-      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md" style={{ background: 'rgba(250, 248, 245, 0.9)' }}>
+      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md" style={{ background: 'rgba(255, 248, 240, 0.9)' }}>
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="font-bold text-lg" style={{ color: 'var(--color-text)' }}>
-            住まいMBTI診断
+          <Link href="/" className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+            🏠 お部屋MBTI
           </Link>
           <nav className="flex items-center gap-6">
             <Link href="/types" className="text-sm font-medium" style={{ color: 'var(--color-text-muted)' }}>
-              タイプ一覧
+              全24タイプ
             </Link>
           </nav>
         </div>
@@ -38,20 +41,20 @@ export default function Home() {
         initial="initial"
         animate="animate"
         variants={stagger}
-        className="pt-32 pb-20 px-6"
+        className="pt-28 pb-16 px-6 relative overflow-hidden"
       >
-        <div className="max-w-4xl mx-auto text-center">
-          {/* メインコピー */}
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          {/* キャッチーなバッジ */}
           <motion.div variants={fadeUp} transition={{ duration: 0.6 }}>
             <span
-              className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-6"
+              className="inline-block px-5 py-2 rounded-full text-sm font-bold mb-6"
               style={{
-                background: 'var(--color-bg-subtle)',
-                color: 'var(--color-text-muted)',
-                border: '1px solid var(--color-border)'
+                background: 'linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%)',
+                color: 'white',
+                boxShadow: '0 4px 15px rgba(255, 107, 107, 0.3)'
               }}
             >
-              32問の心理診断
+              ⚡ たった1分で診断！
             </span>
           </motion.div>
 
@@ -61,83 +64,156 @@ export default function Home() {
             className="text-4xl md:text-6xl font-bold mb-6 leading-tight"
             style={{ color: 'var(--color-text)' }}
           >
-            住む家の選び方、
+            あなたの
+            <span
+              className="inline-block"
+              style={{
+                background: 'linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}
+            >
+              住まい性格
+            </span>
+            、
             <br />
-            <span style={{ color: 'var(--color-accent)' }}>性格でバレる。</span>
+            動物でわかる🐾
           </motion.h1>
 
           <motion.p
             variants={fadeUp}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl mb-10 max-w-2xl mx-auto"
+            className="text-lg md:text-xl mb-8 max-w-2xl mx-auto"
             style={{ color: 'var(--color-text-muted)' }}
           >
-            32問で&quot;住まいの本性&quot;を可視化。
+            15問のカンタン診断で、あなたにピッタリの
             <br className="hidden md:block" />
-            拠点派？身軽派？街派？巣派？
+            <strong>24種類の動物タイプ</strong>を発見しよう！
           </motion.p>
+
+          {/* 動物キャラクターのプレビュー */}
+          <motion.div
+            variants={fadeUp}
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="flex justify-center gap-2 mb-8 flex-wrap"
+          >
+            {sampleAnimals.map((animal, i) => (
+              <motion.span
+                key={i}
+                className="text-3xl md:text-4xl"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.5 + i * 0.1, type: 'spring', stiffness: 200 }}
+              >
+                {animal}
+              </motion.span>
+            ))}
+            <motion.span
+              className="text-xl md:text-2xl flex items-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.3 }}
+              style={{ color: 'var(--color-text-muted)' }}
+            >
+              ...など全24種類！
+            </motion.span>
+          </motion.div>
 
           <motion.div
             variants={fadeUp}
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Link href="/test" className="btn-primary text-lg px-10 py-4">
-              診断をはじめる
-              <span className="ml-2 opacity-70">（約3〜4分）</span>
+            <Link
+              href="/test"
+              className="text-lg px-10 py-4 rounded-full font-bold transition-all hover:scale-105 active:scale-95"
+              style={{
+                background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)',
+                color: 'white',
+                boxShadow: '0 8px 25px rgba(255, 107, 107, 0.4)'
+              }}
+            >
+              🎯 今すぐ診断する
             </Link>
-            <Link href="/types" className="btn-secondary">
-              全16タイプを見る
+            <Link
+              href="/types"
+              className="text-lg px-8 py-4 rounded-full font-medium transition-all hover:scale-105"
+              style={{
+                background: 'white',
+                color: 'var(--color-text)',
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)'
+              }}
+            >
+              全24タイプを見る 👀
             </Link>
           </motion.div>
+
+          {/* 補足テキスト */}
+          <motion.p
+            variants={fadeUp}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mt-6 text-sm"
+            style={{ color: 'var(--color-text-subtle)' }}
+          >
+            ✨ 登録不要・完全無料 ✨
+          </motion.p>
         </div>
 
-        {/* デコレーション - スマホでは非表示 */}
+        {/* デコレーション */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
+          animate={{ opacity: 0.6, scale: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="hidden md:block absolute top-20 right-10 w-64 h-64 rounded-full opacity-10 blur-3xl pointer-events-none"
-          style={{ background: 'var(--color-accent)' }}
+          className="absolute top-20 right-0 w-72 h-72 rounded-full blur-3xl pointer-events-none"
+          style={{ background: 'linear-gradient(135deg, #FFE66D 0%, #FF6B6B 100%)' }}
         />
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
+          animate={{ opacity: 0.5, scale: 1 }}
           transition={{ duration: 1, delay: 0.7 }}
-          className="hidden md:block absolute top-40 left-10 w-48 h-48 rounded-full opacity-10 blur-3xl pointer-events-none"
-          style={{ background: 'var(--color-secondary)' }}
+          className="absolute top-60 left-0 w-56 h-56 rounded-full blur-3xl pointer-events-none"
+          style={{ background: 'linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)' }}
         />
       </motion.section>
 
-      {/* 3つのベネフィット */}
-      <section className="py-20 px-6" style={{ background: 'var(--color-surface)' }}>
+      {/* どんな診断？ */}
+      <section className="py-16 px-6" style={{ background: 'white' }}>
         <div className="max-w-5xl mx-auto">
-          <motion.h2
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-2xl md:text-3xl font-bold text-center mb-12"
-            style={{ color: 'var(--color-text)' }}
+            className="text-center mb-12"
           >
-            診断で分かること
-          </motion.h2>
+            <span className="text-4xl mb-4 block">🤔</span>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4" style={{ color: 'var(--color-text)' }}>
+              どんな診断なの？
+            </h2>
+            <p style={{ color: 'var(--color-text-muted)' }}>
+              あなたの住まい選びの"クセ"を動物キャラで診断！
+            </p>
+          </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                icon: '🏠',
-                title: 'あなたのタイプ（16種）',
-                description: '16タイプの中から、あなたの住まい選びの傾向を特定します。',
+                emoji: '🎯',
+                title: '15問だけ！',
+                description: 'サクサク答えて約1分。直感でポンポン選ぶだけ！',
+                color: '#FF6B6B',
               },
               {
-                icon: '📊',
-                title: '4軸の割合',
-                description: '「住み替え↔拠点」「感性↔条件」「巣↔街」「安定↔改善」の4軸で分析。',
+                emoji: '🐾',
+                title: '24種の動物タイプ',
+                description: 'キツネ🦊、ウサギ🐰、ペンギン🐧...あなたはどれ？',
+                color: '#4ECDC4',
               },
               {
-                icon: '✓',
-                title: '内見チェック＆地雷回避',
-                description: 'あなたのタイプに合った内見ポイントと、避けるべき物件の特徴を提示。',
+                emoji: '📊',
+                title: '傾向グラフ付き',
+                description: '「都心 vs 郊外」「コスパ vs 広さ」など、あなたの傾向を可視化',
+                color: '#FFE66D',
               },
             ].map((item, i) => (
               <motion.div
@@ -146,9 +222,13 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="card p-8 text-center"
+                className="p-8 rounded-3xl text-center"
+                style={{
+                  background: `linear-gradient(135deg, ${item.color}15 0%, ${item.color}05 100%)`,
+                  border: `2px solid ${item.color}30`
+                }}
               >
-                <span className="text-4xl mb-4 block">{item.icon}</span>
+                <span className="text-5xl mb-4 block">{item.emoji}</span>
                 <h3 className="text-xl font-bold mb-3" style={{ color: 'var(--color-text)' }}>
                   {item.title}
                 </h3>
@@ -159,134 +239,158 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 4軸の説明 */}
-      <section className="py-20 px-6" style={{ background: 'var(--color-bg)' }}>
+      {/* タイプ紹介 */}
+      <section className="py-16 px-6" style={{ background: 'linear-gradient(180deg, #F8F6FF 0%, #FFF8F0 100%)' }}>
         <div className="max-w-4xl mx-auto">
-          <motion.h2
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-2xl md:text-3xl font-bold text-center mb-4"
-            style={{ color: 'var(--color-text)' }}
+            className="text-center mb-12"
           >
-            4つの軸で住まい選びを分析
-          </motion.h2>
-          <motion.p
+            <span className="text-4xl mb-4 block">✨</span>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4" style={{ color: 'var(--color-text)' }}>
+              こんなタイプがいるよ！
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { emoji: '🦊', name: 'ネオン節約キツネ', desc: '都心コスパ派' },
+              { emoji: '🐰', name: 'ひだまりバニー', desc: '日当たり重視' },
+              { emoji: '🐧', name: 'セーフティペンギン', desc: '安全第一' },
+              { emoji: '😼', name: 'ネオンナイトキャット', desc: '夜型クリエイター' },
+              { emoji: '🦉', name: '夜ふかしフクロウ', desc: '静かに集中' },
+              { emoji: '🐨', name: 'スローライフコアラ', desc: 'のびのび派' },
+              { emoji: '🐹', name: 'ミニマルハムスター', desc: 'シンプル主義' },
+              { emoji: '🐶', name: 'ペットファーストドッグ', desc: 'ペット最優先' },
+            ].map((type, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+                className="p-4 rounded-2xl text-center"
+                style={{ background: 'white', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}
+              >
+                <span className="text-4xl block mb-2">{type.emoji}</span>
+                <p className="font-bold text-sm mb-1" style={{ color: 'var(--color-text)' }}>{type.name}</p>
+                <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{type.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="text-center mt-8"
           >
-            あなたの住まい選びの傾向を4つの軸で可視化します
-          </motion.p>
+            <Link
+              href="/types"
+              className="inline-flex items-center gap-2 text-sm font-medium"
+              style={{ color: 'var(--color-accent)' }}
+            >
+              全24タイプを見る →
+            </Link>
+          </motion.div>
+        </div>
+      </section>
 
-          <div className="grid gap-6">
+      {/* 診断の流れ */}
+      <section className="py-16 px-6" style={{ background: 'white' }}>
+        <div className="max-w-3xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <span className="text-4xl mb-4 block">📝</span>
+            <h2 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--color-text)' }}>
+              カンタン3ステップ
+            </h2>
+          </motion.div>
+
+          <div className="space-y-6">
             {[
-              { left: 'Flow（住み替え）', right: 'Anchor（拠点）', desc: '身軽に住み替える派 vs 拠点を育てる派', colorLeft: 'var(--color-flow)', colorRight: 'var(--color-anchor)' },
-              { left: 'Feel（感性）', right: 'Spec（条件）', desc: '体感・ときめきで選ぶ派 vs 条件・スペックで選ぶ派', colorLeft: 'var(--color-feel)', colorRight: 'var(--color-spec)' },
-              { left: 'Nest（巣）', right: 'City（街）', desc: '家を充実させたい派 vs 街を使い倒したい派', colorLeft: 'var(--color-nest)', colorRight: 'var(--color-city)' },
-              { left: 'Calm（安定）', right: 'Upgrade（改善）', desc: '平穏・安心を求める派 vs 改善・挑戦を求める派', colorLeft: 'var(--color-calm)', colorRight: 'var(--color-upgrade)' },
-            ].map((axis, i) => (
+              { step: '1', emoji: '💭', title: '15問に答える', desc: '直感でサクサク選ぶだけ！悩まなくてOK' },
+              { step: '2', emoji: '🎉', title: '結果発表！', desc: 'あなたの動物タイプと傾向グラフが表示' },
+              { step: '3', emoji: '📤', title: 'シェアして比較', desc: '友達と結果を比べると超盛り上がる！' },
+            ].map((item, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="card p-6"
+                className="flex items-center gap-6 p-6 rounded-2xl"
+                style={{ background: 'var(--color-bg-subtle)' }}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-bold" style={{ color: axis.colorLeft }}>{axis.left}</span>
-                  <span className="text-sm" style={{ color: 'var(--color-text-subtle)' }}>↔</span>
-                  <span className="font-bold" style={{ color: axis.colorRight }}>{axis.right}</span>
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center text-2xl font-bold flex-shrink-0"
+                  style={{
+                    background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)',
+                    color: 'white'
+                  }}
+                >
+                  {item.step}
                 </div>
-                <div className="h-2 rounded-full mb-3" style={{ background: 'var(--color-border)' }}>
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: '50%',
-                      background: `linear-gradient(90deg, ${axis.colorLeft}, ${axis.colorRight})`
-                    }}
-                  />
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-2xl">{item.emoji}</span>
+                    <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>{item.title}</h3>
+                  </div>
+                  <p style={{ color: 'var(--color-text-muted)' }}>{item.desc}</p>
                 </div>
-                <p className="text-sm text-center" style={{ color: 'var(--color-text-muted)' }}>{axis.desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 診断のルール */}
-      <section className="py-20 px-6" style={{ background: 'var(--color-surface)' }}>
-        <div className="max-w-3xl mx-auto">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-2xl md:text-3xl font-bold text-center mb-12"
-            style={{ color: 'var(--color-text)' }}
-          >
-            診断のルール
-          </motion.h2>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="card p-8"
-          >
-            <ul className="space-y-4">
-              {[
-                { icon: '🎯', text: 'A/Bで直感で選ぶ（悩みすぎない）' },
-                { icon: '🏠', text: '住む家の話だけ（投資・利回りは除外）' },
-                { icon: '💾', text: '結果は保存・共有できる' },
-                { icon: '⏱️', text: '8問ごとにページ切替（全32問）' },
-              ].map((rule, i) => (
-                <li key={i} className="flex items-start gap-4">
-                  <span className="text-2xl">{rule.icon}</span>
-                  <span className="text-lg" style={{ color: 'var(--color-text)' }}>{rule.text}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        </div>
-      </section>
-
       {/* CTA */}
-      <section className="py-24 px-6" style={{ background: 'var(--color-bg)' }}>
+      <section className="py-20 px-6" style={{ background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 50%, #FFE66D 100%)' }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="max-w-3xl mx-auto text-center"
         >
-          <h2 className="text-2xl md:text-4xl font-bold mb-6" style={{ color: 'var(--color-text)' }}>
-            友達と比べると面白い
+          <span className="text-6xl block mb-6">🏠</span>
+          <h2 className="text-2xl md:text-4xl font-bold mb-4" style={{ color: 'white' }}>
+            あなたは何タイプ？
           </h2>
-          <p className="text-lg mb-8" style={{ color: 'var(--color-text-muted)' }}>
-            同じ条件でも、選び方は人それぞれ。
-            <br />
-            あなたの&quot;住まいの本性&quot;を発見しよう。
+          <p className="text-lg mb-8" style={{ color: 'rgba(255,255,255,0.9)' }}>
+            たった1分で、住まい選びの"本当の自分"がわかる！
           </p>
-          <Link href="/test" className="btn-primary text-lg px-12 py-5">
-            診断をはじめる
+          <Link
+            href="/test"
+            className="inline-block text-lg px-12 py-5 rounded-full font-bold transition-all hover:scale-105 active:scale-95"
+            style={{
+              background: 'white',
+              color: '#FF6B6B',
+              boxShadow: '0 8px 25px rgba(0, 0, 0, 0.2)'
+            }}
+          >
+            🎯 無料で診断スタート！
           </Link>
         </motion.div>
       </section>
 
       {/* フッター */}
-      <footer className="py-8 px-6" style={{ borderTop: '1px solid var(--color-border)' }}>
+      <footer className="py-8 px-6" style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-border)' }}>
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm" style={{ color: 'var(--color-text-subtle)' }}>
-            © 2024 住まいMBTI診断
+            © 2024 お部屋MBTI診断
           </p>
           <div className="flex items-center gap-6">
-            <Link href="/privacy" className="text-sm" style={{ color: 'var(--color-text-subtle)' }}>
-              プライバシーポリシー
+            <Link href="/types" className="text-sm" style={{ color: 'var(--color-text-subtle)' }}>
+              全24タイプ
             </Link>
-            <Link href="/terms" className="text-sm" style={{ color: 'var(--color-text-subtle)' }}>
-              免責事項
+            <Link href="/test" className="text-sm" style={{ color: 'var(--color-text-subtle)' }}>
+              診断する
             </Link>
           </div>
         </div>
